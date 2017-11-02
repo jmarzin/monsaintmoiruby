@@ -1,0 +1,14 @@
+matos1:
+  id: 1
+  nom: materiel 1
+  description: description materiel 1
+  photo: 0pasdimage.jpg
+  poids: 12
+  reforme: false
+matos2:
+  id: 2
+  nom: materiel 2
+  description: description materiel 2
+  photo: une_autre_photo.jpg
+  poids: 11
+  reforme: false

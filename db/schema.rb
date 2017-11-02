@@ -1,0 +1,108 @@
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# Note that this schema.rb definition is the authoritative source for your
+# database schema. If you need to create the application database on another
+# system, you should be using db:schema:load, not running all the migrations
+# from scratch. The latter is a flawed and unsustainable approach (the more migrations
+# you'll amass, the slower it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended that you check this file into your version control system.
+
+ActiveRecord::Schema.define(version: 20171028195212) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
+  create_table "gpx", id: :serial, force: :cascade do |t|
+    t.bigint "idtrek"
+    t.text "titre", null: false
+    t.text "soustitre", null: false
+    t.text "description", null: false
+    t.text "listematos"
+    t.text "nomfichier"
+    t.integer "altitudeminimum"
+    t.integer "altitudemaximum"
+    t.integer "ascensiontotale"
+    t.integer "descentetotale"
+    t.text "heuredebut", null: false
+    t.text "heurefin", null: false
+    t.integer "distancetotale"
+    t.text "depart"
+    t.text "arrivee"
+    t.text "coordonneespix"
+    t.string "typegpx", limit: 1
+  end
+
+  create_table "materiel", id: :serial, force: :cascade do |t|
+    t.text "nom", null: false
+    t.text "description", null: false
+    t.text "photo", null: false
+    t.integer "poids", null: false
+    t.boolean "reforme"
+  end
+
+  create_table "materiels", id: :serial, force: :cascade do |t|
+    t.string "nom"
+    t.text "description"
+    t.string "photo"
+    t.integer "poids"
+    t.boolean "reforme"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "materiels_traces", force: :cascade do |t|
+    t.bigint "trace_id"
+    t.bigint "materiel_id"
+    t.index ["trace_id"], name: "index_materiels_traces_on_trace_id"
+  end
+
+  create_table "play_evolutions", id: :integer, default: nil, force: :cascade do |t|
+    t.string "hash", limit: 255, null: false
+    t.datetime "applied_at", null: false
+    t.text "apply_script"
+    t.text "revert_script"
+    t.string "state", limit: 255
+    t.text "last_problem"
+  end
+
+  create_table "points", force: :cascade do |t|
+    t.integer "distance"
+    t.integer "altitude"
+    t.bigint "trace_id"
+    t.index ["trace_id"], name: "index_points_on_trace_id"
+  end
+
+  create_table "traces", force: :cascade do |t|
+    t.bigint "traces_id"
+    t.string "titre"
+    t.string "sous_titre"
+    t.text "description"
+    t.string "fichier_gpx"
+    t.integer "altitude_minimum"
+    t.integer "altitude_maximum"
+    t.integer "ascension_totale"
+    t.integer "descente_totale"
+    t.datetime "heure_debut"
+    t.datetime "heure_fin"
+    t.integer "distance_totale"
+    t.decimal "lat_depart"
+    t.decimal "long_depart"
+    t.decimal "lat_arrivee"
+    t.decimal "long_arrivee"
+    t.string "type"
+    t.string "repertoire_photos"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+
+    t.index ["traces_id"], name: "index_traces_on_traces_id"
+  end
+
+  create_table "trekmateriel", id: :serial, force: :cascade do |t|
+    t.bigint "idtrek"
+    t.bigint "idmateriel"
+  end
+
+end
