@@ -82,6 +82,10 @@ test:
 #
 production:
   <<: *default
+  host:
+  adapter: postgresql
+  encoding: utf8
   database: monsaintmoiruby
-  username: italien
-  password: 51julie2
+  pool: 5
+  username: <%= ENV['monsaintmoiruby_DATABASE_USER'] %>
+  password: <%= ENV['monsaintmoiruby_DATABASE_PASSWORD'] %>
