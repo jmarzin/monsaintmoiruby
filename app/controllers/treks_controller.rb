@@ -1,10 +1,13 @@
+##
+# classe de contrôle des treks. Elle hérite du contrôle
+# des traces
 class TreksController < TracesController
-
   before_action :set_class
   before_action :set_trace, only: %i[show edit update destroy]
   before_action :test_admin, only: %i[edit update destroy new create]
   before_action :set_menu
 
+  # GET /treks/1
   def show
     unless @trace.repertoire_photos.blank?
       super
@@ -17,12 +20,13 @@ class TreksController < TracesController
         photos = Dir.entries(repertoire)
         unless photos.empty?
           @photos += photos.select {|f| File.extname(f).casecmp('.JPG').zero?}
-                         .map {|f| File.join('/images', randonnee.repertoire_photos, f)}
+                           .map {|f| File.join('/images', randonnee.repertoire_photos, f)}
         end
       end
     end
   end
 
+  # affiche le trek projet
   def a_propos
     session[:menu] = 'A propos'
     @trek = Trek.where(titre: 'Le projet')
@@ -36,38 +40,19 @@ class TreksController < TracesController
   end
 
   # POST /treks
+  # l'essentiel du traitement est géré dans la classe trace
   def create
     @trace = Trace.new(trace_params)
-    @trace.materiel_ids = params[@class_symbol][:materiel_ids]
     @trace.randonnee_ids = params[@class_symbol][:randonnee_ids]
-    @gpx_avant = params[:gpx_avant]
-    fichier_gpx = traite_traces_si_besoin
-    @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
-    if @trace.save
-      redirect_to @trace, notice: 'La randonnée a bien été créée.'
-    else
-      @gpx_candidats = gpx_candidats
-      @rep_photos_candidats = rep_photos_candidats
-      render :new
-    end
+    super
   end
 
+  # PATCH/PUT /treks/1
+  # l'essentiel du traitement est géré dans la classe trace
   def update
     @trace.assign_attributes(trace_params)
-    @gpx_avant = params[:gpx_avant]
     @trace.randonnee_ids = params[@class_symbol][:randonnee_ids]
-    fichier_gpx = traite_traces_si_besoin
-    @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
-    @trace.materiel_ids = params[@class_symbol][:materiel_ids]
-    if @trace.save
-      @trace.points.clear if @trace.fichier_gpx.blank?
-      redirect_to @trace, notice: 'La randonnée a bien été modifiée.'
-    else
-      @gpx_candidats = gpx_candidats
-      @rep_photos_candidats = (@trace.repertoire_photos.nil? ? [] : [@trace.repertoire_photos]) +
-          rep_photos_candidats
-      render :edit
-    end
+    super
   end
 
   # DELETE /treks/1
@@ -78,24 +63,27 @@ class TreksController < TracesController
 
   private
 
+  # dresse la liste des traces candidates, celles qui ne sont
+  # pas liées à un autre trek
   def gpx_candidats
     Randonnee.where("traces_id IS NULL AND  fichier_gpx <> ''")
              .order(:fichier_gpx)
   end
 
+  # conserve la liste des randonnées sélectionnées lors de la
+  # dernière transaction
   def gpx_avant
-    if @trace.fichier_gpx.blank?
-      ['']
-    else
-      @trace.randonnees.collect(&:fichier_gpx).sort
-    end
+    @trace.fichier_gpx.blank? ? [''] : @trace.randonnees.collect(&:fichier_gpx).sort
   end
 
+  # lance le traitement de fusion des traces des randonnées
+  # uniquement si c'est nécessaire
   def traite_traces_si_besoin
     @gpx_apres = @trace.randonnees.collect(&:fichier_gpx).sort
-    ((@gpx_avant <=> @gpx_apres).zero?) ? nil : @trace.fusionne(@gpx_apres)
+    ((@gpx_avant <=> @gpx_apres).zero? || @gpx_apres.empty?) ? nil : @trace.fusionne(@gpx_apres)
   end
 
+  # détermine l'item du menu qui doit être mis en évidence
   def set_menu
     session[:menu] = 'Treks'
   end

@@ -1,4 +1,9 @@
+##
+# classe de gestion des matériels emportés
 class Materiel < ApplicationRecord
+
+  # fournit une description courte du matériel
+  # limité à 120 caractères. La mise en forme html est perdue
   def description_courte
     desc = HTMLEntities.new.decode(self.description.gsub(/<.*?>/, ''))
     coupure = desc.index(' ', 120)
@@ -9,6 +14,8 @@ class Materiel < ApplicationRecord
     end
   end
 
+  # facilite la sélection des items emportés
+  # renvoie le nom, le poids et une éventuelle mention de réforme
   def nom_poids_et_reforme
     nom + ' : ' + poids.to_s + ' g ' + (self.reforme ? '(réformé)' : '')
   end

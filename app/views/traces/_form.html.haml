@@ -2,11 +2,13 @@
   = form_for @trace do |f|
     - if @trace.errors.any?
       #error_explanation
-        %h2= "#{pluralize(@trace.errors.count, "erreur")} , la trace ne peut pas être enregistrée :"
+        %h2
+          = "#{pluralize(@trace.errors.count, 'erreur')}"
+          , la trace ne peut pas être enregistrée :
         %ul
           - @trace.errors.full_messages.each do |message|
             %li= message
-    -if current_page? action: 'new'
+    -if @garder_points
       = f.fields_for :points  do |f_points|
         = f_points.hidden_field :distance
         = f_points.hidden_field :altitude
@@ -19,23 +21,25 @@
       = f.text_field :sous_titre
     .field
       = f.label :description
-      = f.text_area :description, :class => "tinymce", :rows => 10, :cols => 80, :id => 'mytextarea'
+      = f.text_area :description, :class => 'tinymce', :rows => 10, :cols => 80,
+       :id => 'mytextarea'
     .field
       -@gpx_avant.each do |gpx|
-        %input{ :type => "hidden", :name => "gpx_avant[]", :value => gpx }
+        %input{ :type => 'hidden', :name => 'gpx_avant[]', :value => gpx }
       -if @trace.is_a? Randonnee
-        -@gpx_candidats.each do |gpx|
-          %input{ :type => "hidden", :name => "gpx_candidats[]", :value => gpx[0] }
         = f.label :fichier_gpx
-        = f.select :fichier_gpx, options_for_select(@gpx_candidats, @trace.fichier_gpx)
+        = f.select :fichier_gpx,
+         options_for_select(@gpx_candidats.map { |g| [g, g]}, @trace.fichier_gpx),
+         include_blank: :true
         .field
           = f.label :nouveau_fichier_gpx
           = f.file_field :nouveau_fichier_gpx, accept: '.gpx'
       -else
+        = f.hidden_field :fichier_gpx
         = f.label :randonnees_ids, 'Randonnées incluses'
         %ul.list-unstyled
           = f.collection_check_boxes :randonnee_ids,
-           (@trace.randonnees + @gpx_candidats).uniq.sort { |x, y| x.fichier_gpx <=> y.fichier_gpx },
+            (@trace.randonnees + @gpx_candidats).uniq.sort { |x, y| x.fichier_gpx <=> y.fichier_gpx },
             :id, :fichier_titre do |b|
             %li
               =b.check_box
@@ -75,9 +79,11 @@
       = f.text_field :long_arrivee
     .field
       = f.label :repertoire_photos
-      = f.select :repertoire_photos, options_for_select(@rep_photos_candidats, @trace.repertoire_photos), include_blank: :true
+      = f.select :repertoire_photos,
+        options_for_select(@rep_photos_candidats.map { |r| [r, r] }, @trace.repertoire_photos),
+        include_blank: :true
     .field
-      = f.label :materiels_ids, "Matériels emportés"
+      = f.label :materiels_ids, 'Matériels emportés'
       %ul.list-unstyled
         = f.collection_check_boxes :materiel_ids,
           (@trace.materiels + Materiel.where(:reforme => false).order(poids: :desc)).uniq,
@@ -88,7 +94,7 @@
     .field
       = f.hidden_field :type, :value => @trace.type
     .actions
-      = f.submit f.object.new_record? ? "Créer" : "Mettre à jour", :class => 'btn-primary'
+      = f.submit f.object.new_record? ? 'Créer' : 'Mettre à jour', :class => 'btn-primary'
 
 :javascript
   $(document).ready(function(){

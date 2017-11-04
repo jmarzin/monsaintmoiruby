@@ -6,7 +6,7 @@
     %nav
       %ul.pagination.justify-content-center
         %li.page-item{ :class => (@page_a_afficher == 1) ? 'disabled' : '' }
-          %a.page-link{ :href =>  randonnees_page_path(@page_a_afficher - 1), :tabindex => "-1" }
+          %a.page-link{ :href =>  randonnees_page_path(@page_a_afficher - 1), :tabindex => '-1' }
             Précédent
         - (1..@nb_pages).each do |i|
           - if i == @page_a_afficher
@@ -18,7 +18,7 @@
             %li.page-item
               %a.page-link{ :href => randonnees_page_path(i) } #{i}
         %li.page-item{ :class => (@page_a_afficher == @nb_pages) ? 'disabled' : '' }
-          %a.page-link{ :href => randonnees_page_path(@page_a_afficher + 1), :tabindex => "+1" }
+          %a.page-link{ :href => randonnees_page_path(@page_a_afficher + 1), :tabindex => '+1' }
             Suivant
   =render 'traces/index'
   -for trace in @traces

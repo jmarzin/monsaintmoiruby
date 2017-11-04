@@ -1,31 +1,14 @@
 class TracesController < ApplicationController
+  TAILLE_PAGE = 9
+
   # GET /traces
-  # GET /traces.json
-
-  TaillePage = 9
-
   def index
-    @page_a_afficher = params[:id]
-    if @page_a_afficher.nil?
-      if controller_name == 'randonnees'
-        redirect_to randonnees_page_url(1)
-      else
-        redirect_to treks_page_url(1)
-      end
-      return
-    end
-    @page_a_afficher = @page_a_afficher.to_i
-    @traces = Trace.where(type: controller_name.classify).order(heure_debut: :desc)
-    @nb_pages = [((@traces.size + 8.0) / TaillePage).floor, 1].max
-    if @page_a_afficher > @nb_pages
-      if controller_name == 'randonnees'
-        redirect_to randonnees_page_url(@nb_pages)
-      else
-        redirect_to treks_page_url(@nb_pages)
-      end
-      return
-    end
-    @traces = @traces.to_a.slice((@page_a_afficher - 1) * TaillePage, TaillePage)
+    return if (@page_a_afficher = corrige_page? do
+                 Trace.where(type: controller_name.classify)
+                     .order(heure_debut: :desc)
+               end).nil?
+    @traces = @traces.to_a.slice((@page_a_afficher - 1) *
+                                 TAILLE_PAGE, TAILLE_PAGE)
   end
 
   # GET /traces/1
@@ -44,44 +27,82 @@ class TracesController < ApplicationController
   # GET /traces/new
   def new
     @trace = Trace.new(type: controller_name.classify)
-    @gpx_candidats = gpx_candidats
-    @rep_photos_candidats = rep_photos_candidats
-    @gpx_avant = gpx_avant
+    init_variables
+    @garder_points = false # il n'y en a pas encore
+  end
+
+  # POST /treks
+  def create
+    unless params[@class_symbol][:points_attributes].nil?
+      params[@class_symbol][:points_attributes].each do |_cle, pa|
+        @trace.points << Point.new(distance: pa[:distance].to_i, altitude: pa[:altitude].to_i)
+      end
+    end
+    @trace.materiel_ids = params[@class_symbol][:materiel_ids]
+    @gpx_avant = params[:gpx_avant]
+    fichier_gpx = traite_traces_si_besoin
+    @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
+    if @trace.save
+      redirect_to @trace, notice: 'La randonnée a bien été créée.'
+    else
+      init_variables
+      @garder_points = true
+      render :new
+    end
   end
 
   # GET /traces/1/edit
   def edit
-    @gpx_avant = gpx_avant
-    @gpx_candidats = gpx_candidats
-    @rep_photos_candidats = (@trace.repertoire_photos.nil? ? [] : [@trace.repertoire_photos]) +
-        rep_photos_candidats
+    init_variables
+    @garder_points = false
   end
 
   # PATCH/PUT /traces/1
   def update
-    @trace.assign_attributes(trace_params)
     @gpx_avant = params[:gpx_avant]
     fichier_gpx = traite_traces_si_besoin
-    nouveau_fichier = fichier_gpx.nil? ? params[@class_symbol][:fichier_gpx] : fichier_gpx
-    @trace.maj unless fichier_gpx.nil? &&
-                      (nouveau_fichier.blank? || nouveau_fichier == @trace.fichier_gpx)
-    @trace.fichier_gpx = nouveau_fichier
+    @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
     @trace.materiel_ids = params[@class_symbol][:materiel_ids]
     if @trace.save
       @trace.points.clear if @trace.fichier_gpx.blank?
       redirect_to @trace, notice: 'La randonnée a bien été modifiée.'
     else
-      @gpx_candidats = (@trace.fichier_gpx.nil? ? [] : [@trace.fichier_gpx]) +
-                       gpx_candidats
-      @rep_photos_candidats = (@trace.repertoire_photos.nil? ? [] : [@trace.repertoire_photos]) +
-                              rep_photos_candidats
-      @gpx_avant = [@trace.fichier_gpx]
+      init_variables
+      @garder_points = false
       render :edit
     end
   end
 
   private
 
+  # initialise les variables nécessaires à la construction
+  # de la page à afficher
+  def init_variables
+    @gpx_candidats = gpx_candidats
+    @rep_photos_candidats = rep_photos_candidats
+    @gpx_avant = gpx_avant
+  end
+
+  # corrige la page demandée si nécessaire
+  def corrige_page? &requete
+    if params[:idpage].nil?
+      redirect_to action: action_name, idpage: 1
+      nil
+    else
+      @traces = requete.call
+      @nb_pages = [((@traces.size + TAILLE_PAGE) / TAILLE_PAGE).floor, 1].max
+      if params[:idpage].to_i > @nb_pages
+        redirect_to action: action_name, id: params[:id], idpage: @nb_pages
+        nil
+      else
+        params[:idpage].to_i
+      end
+    end
+  end
+
+  # dresse la liste des répertoires de photos qui peuvent
+  # être sélectionnés, c'est-à-dire ceux qui ne sont pas
+  # référencés par une randonnée ou un trek
   def rep_photos_candidats
     classe = @trace.type == 'Randonnee' ? Randonnee : Trek
     repertoire = Rails.root.join('public', 'images')
@@ -90,24 +111,34 @@ class TracesController < ApplicationController
       (File.directory? File.join(repertoire, f)) &&
         !(['.', '..'].include? f)
     end
-    rep_photos_base = classe.select(:repertoire_photos)
+    rep_photos_base = classe.where.not(id: @trace.id)
+                            .select(:repertoire_photos)
                             .distinct
                             .collect(&:repertoire_photos)
-    (rep_photos_serveur - rep_photos_base).collect { |r| [r, r] }
+    rep_photos_serveur - rep_photos_base
   end
 
-  # Use callbacks to share common setup or constraints between actions.
-
+  # initialise le nom de la classe concernée
   def set_class
     @class_symbol = controller_name.classify.downcase.to_sym
   end
 
+  # initialise la trace à traiter et vérifie son type
   def set_trace
-    @trace = Trace.find(params[:id])
+    @trace = Trace.where(id: params[:id])
+    if @trace.empty?
+      redirect_back fallback_location: root_path,
+             notice: "La trace #{params[:id]} n'existe pas"
+    elsif @trace.first.class.to_s.downcase.to_sym != @class_symbol
+      redirect_back fallback_location: root_path,
+             notice: "La trace #{params[:id]} n'est pas du type #{@class_symbol.to_s}"
+    end
+    @trace = @trace.first
   end
 
+  # teste si l'utilisateur est administrateur
   def test_admin
-    if false # session[:admin].nil?
+    if session[:admin].nil?
       if %w[destroy edit update].index(action_name)
         redirect_to @trace, notice: "Vous n'êtes pas administrateur"
       else

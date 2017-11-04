@@ -1,27 +1,28 @@
+##
+# classe du contrôleur des matériels
 class MaterielsController < ApplicationController
   before_action :set_materiel, only: %i[show edit update destroy]
   before_action :test_admin, only: %i[edit update destroy new create]
   before_action :set_menu
 
   # GET /materiels
-  # GET /materiels.json
   def index
-    @materiels = Materiel.all.order(poids: :desc)
+    @materiels = Materiel.all.order(reforme: :asc, poids: :desc)
   end
 
+  # GET  /materiels/traces/1
   def index_trace
     @materiels = Trace.find(params[:id]).materiels.order(poids: :desc)
     render 'index'
   end
 
   # GET /materiels/1
-  # GET /materiels/1.json
   def show; end
 
   # GET /materiels/new
   def new
     @materiel = Materiel.new
-    @materiel.photo = "0pasdimage.jpg"
+    @materiel.photo = '0pasdimage.jpg'
     @photos_candidates = photos_candidates
   end
 
@@ -31,85 +32,80 @@ class MaterielsController < ApplicationController
   end
 
   # POST /materiels
-  # POST /materiels.json
   def create
     @materiel = Materiel.new(materiel_params)
     photo = charge_photo_si_besoin
     @materiel.photo = photo unless photo.nil?
-    respond_to do |format|
-      if @materiel.save
-        format.html { redirect_to @materiel, notice: 'Le matériel est bien enregistré' }
-        format.json { render :show, status: :created, location: @materiel }
-      else
-        @photos_candidates = photos_candidates
-        format.html { render :new }
-        format.json { render json: @materiel.errors, status: :unprocessable_entity }
-      end
+    if @materiel.save
+      redirect_to @materiel, notice: 'Le matériel est bien enregistré'
+    else
+      @photos_candidates = photos_candidates
+      render :new
     end
   end
 
   # PATCH/PUT /materiels/1
-  # PATCH/PUT /materiels/1.json
   def update
     photo = charge_photo_si_besoin
     params[:materiel][:photo] = photo unless photo.nil?
-    respond_to do |format|
-      if @materiel.update(materiel_params)
-        format.html { redirect_to @materiel, notice: 'Le matériel a bien été corrigé.' }
-        format.json { render :show, status: :ok, location: @materiel }
-      else
-        @photos_candidates = photos_candidates
-        format.html { render :edit }
-        format.json { render json: @materiel.errors, status: :unprocessable_entity }
-      end
+    if @materiel.update(materiel_params)
+      redirect_to @materiel, notice: 'Le matériel a bien été corrigé.'
+    else
+      @photos_candidates = photos_candidates
+      render :edit
     end
   end
 
   # DELETE /materiels/1
-  # DELETE /materiels/1.json
   def destroy
     @materiel.destroy
-    respond_to do |format|
-      format.html { redirect_to materiels_url, notice: 'Le matériel a bien été détruit.' }
-      format.json { head :no_content }
-    end
+    redirect_to materiels_url, notice: 'Le matériel a bien été détruit.'
   end
 
   private
 
+  # dresse la liste des photos candidats pour un matériels.
+  # elle comprend les photos du répertoire matériels qui ne
+  # sont pas encore assignées à un matériel
   def photos_candidates
-    photos_repertoire = Dir.entries(Rails.root.join('public', 'materiels')).select {|f| !File.directory? f}
+    repertoire = Rails.root.join('public', 'materiels')
+    photos_repertoire = Dir.entries(repertoire)
+                           .reject do |f|
+                             File.directory? File.join(repertoire, f)
+                           end
     photos_base = Materiel.where.not(photo: '0pasdimage.jpg')
-                      .select(:photo)
-                      .distinct
-                      .collect(&:photo)
-    (photos_repertoire - photos_base).collect {|p| [p, p]}
+                          .select(:photo)
+                          .distinct
+                          .collect(&:photo)
+    (photos_repertoire - photos_base).collect { |p| [p, p] }
   end
 
-  # Use callbacks to share common setup or constraints between actions.
+  # définit le matériel utilisé
   def set_materiel
     @materiel = Materiel.find(params[:id])
   end
 
-  # Never trust parameters from the scary internet, only allow the white list through.
+  # réduit la liste des paramètres acceptés
   def materiel_params
     params.require(:materiel).permit(:nom, :description, :photo, :poids, :reforme)
   end
 
+  # définit l'option du menu à mettre en évidence
   def set_menu
-    session[:menu] = "Matériels"
+    session[:menu] = 'Matériels'
   end
 
+  # redirige les tentatives de modification par un non administrateur
   def test_admin
-    if session[:admin].nil?
-      if ['destroy', 'edit', 'update'].index(action_name)
-        redirect_to @materiel, notice: "Vous n'êtes pas administrateur"
-      else
-        redirect_to materiels_url, notice: "Vous n'êtes pas administrateur"
-      end
+    return if session[:admin]
+    if %w[destroy edit update].index(action_name)
+      redirect_to @materiel, notice: "Vous n'êtes pas administrateur"
+    else
+      redirect_to materiels_url, notice: "Vous n'êtes pas administrateur"
     end
   end
 
+  # charge la photo sélectionnée par l'utilisateur sur son pdt
   def charge_photo_si_besoin
     uploaded_io = params[:materiel][:nouvelle_photo]
     if uploaded_io.nil?

@@ -1,4 +1,5 @@
-=image_tag("saintjacques.jpg", :class => "img-fluid rounded mb-3 mb-md-0", :alt => "Saint-Jacques de Compostelle")
+=image_tag('saintjacques.jpg', class: 'img-fluid rounded mb-3 mb-md-0',
+ :alt => 'Saint-Jacques de Compostelle')
 .container
   %p#notice= notice
   .row
@@ -11,7 +12,8 @@
               =@ecart_retraite
         .card-footer
           %p
-            %button.btn-primary{"data-content" => "C'est le temps qui me sépare de mon départ en retraite !", "data-toggle" => "popover", :nom => "Explication", :type => "button"} En savoir plus
+            %button.btn-primary{'data-content': "C'est le temps qui me sépare de mon départ en retraite !",
+             'data-toggle': 'popover', nom: 'Explication', type: 'button'} En savoir plus
     .col-md-6.mb-4
       .card.h-100
         %h4.card-header Grand départ
@@ -21,7 +23,8 @@
               =@ecart_depart
         .card-footer
           %p
-            %button.btn-primary{"data-content" => "C'est le temps qui me sépare de mon départ pour Saint-Jacques !", "data-toggle" => "popover", :nom => "Explication", :type => "button"} En savoir plus
+            %button.btn-primary{'data-content': "C'est le temps qui me sépare de mon départ pour Saint-Jacques !",
+             'data-toggle' => 'popover', nom: 'Explication', type: 'button'} En savoir plus
 :javascript
   $(document).ready(function(){
     $('[data-toggle="popover"]').popover();

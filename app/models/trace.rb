@@ -1,8 +1,14 @@
+##
+# ajoute au module math une fonction de conversion
+# en radians d'un angle en degré
 module Math
   def self.to_radians(angle)
     angle / 180 * Math::PI
   end
 end
+
+##
+# classe de gestion des traces
 class Trace < ApplicationRecord
   validates :titre, presence: true
   validates :sous_titre, presence: true
@@ -21,17 +27,22 @@ class Trace < ApplicationRecord
   validates :long_depart, presence: true, unless: :tout_vide?
   validates :long_arrivee, presence: true, unless: :tout_vide?
 
-  has_many :points, dependent: :destroy
+  has_many :points, dependent: :delete_all
   accepts_nested_attributes_for :points
   has_and_belongs_to_many :materiels, autosave: true
   accepts_nested_attributes_for :materiels
 
+  # permet de construire le profil en limitant le dénivelé à 1000 points
+  # ce faisant, la distance parcourue est représentée sur 2000 points
   PRECISION = BigDecimal(1000)
 
+  # teste si aucune coordonnées, même partielle, n'est fournie
   def tout_vide?
     lat_arrivee.nil? && lat_depart.nil? && long_arrivee.nil? && long_depart.nil?
   end
 
+  # calcule la distance en mètres entre deux points dont on fournit
+  # les coordonnées gps
   def distance(p1, p2)
     a = 6_378_137
     b = 6_356_752.314245
@@ -84,48 +95,72 @@ class Trace < ApplicationRecord
     b * a_maj * (sigma - delta_sigma)
   end
 
+  # met à jour les caractéristiques de la randonnées et construit
+  # le profil après ouverture du fichier gpx
   def maj
-    puts "debut de maj #{Time.now.to_f}"
     @doc = File.open(File.join('public', 'gpx',
                                self.class == Randonnee ? 'randos' : 'treks',
                                fichier_gpx)) { |f| Nokogiri::XML(f) }
     maj_apres_lecture(@doc)
   end
 
+  # met à jour les caractéristiques de la randonnées et construit
+  # le profil à partir du fichier gpx ouvert
   def maj_apres_lecture(doc)
+    init_trace
+    @altitudes = []
+    @distances_cumulees = []
+    doc.xpath('//xmlns:trk').each do |trk|
+      traite_altitudes(trk)
+      traite_distances(trk)
+    end
+    calcule_heures_debut_et_fin(doc)
+    calc_coord_depart_et_arrivee(doc)
+    self.points = traite_profil
+  end
+
+  # initialise les données de la trace qui seront
+  # mises à jour
+  def init_trace
     self.altitude_minimum = 10_000
     self.altitude_maximum = -10_000
     self.ascension_totale = 0
     self.descente_totale = 0
     self.distance_totale = 0
-    altitudes = []
-    distances_cumulees = []
-    doc.xpath('//xmlns:trk').each do |trk|
-      alt = trk.xpath('.//xmlns:ele').map { |ele| ele.text.to_i }
-      altitudes += alt
-      self.altitude_minimum = [altitude_minimum, alt.min].min
-      self.altitude_maximum = [altitude_maximum, alt.max].max
-      diff_altitudes = alt.zip(alt.drop(1))[0..-2].map { |t| t[1] - t[0] }
-      self.ascension_totale += diff_altitudes.select { |dif| dif > 0 }
-                                             .reduce(0, :+)
-      self.descente_totale += diff_altitudes.select { |dif| dif < 0 }
-                                            .reduce(0, :+).abs
-      trkpt = trk.xpath('.//xmlns:trkpt').map do |t|
-        [BigDecimal(t.xpath('@lat').text), BigDecimal(t.xpath('@lon').text)]
-      end
-      puts "lancement calcul distances #{Time.now.to_f}"
-      distances = trkpt.zip(trkpt.drop(1))[0..-2]
-                       .map { |p| distance(p[0], p[1]) }
-      puts "fin calcul distances #{Time.now.to_f}"
-      dist_cumulees = BigDecimal(distance_totale)
-      distances.each do |d|
-        dist_cumulees += d
-        distances_cumulees << dist_cumulees
-      end
-      self.distance_totale = dist_cumulees.to_i
-    end
     self.heure_debut = ''
     self.heure_fin = ''
+  end
+
+  # traite les altitudes
+  def traite_altitudes(trk)
+    alt = trk.xpath('.//xmlns:ele').map { |ele| ele.text.to_i }
+    @altitudes += alt
+    self.altitude_minimum = [altitude_minimum, alt.min].min
+    self.altitude_maximum = [altitude_maximum, alt.max].max
+    diff_altitudes = alt.zip(alt.drop(1))[0..-2].map { |t| t[1] - t[0] }
+    self.ascension_totale += diff_altitudes.select { |dif| dif > 0 }
+                                           .reduce(0, :+)
+    self.descente_totale += diff_altitudes.select { |dif| dif < 0 }
+                                          .reduce(0, :+).abs
+  end
+
+  # calcule et traite les distances
+  def traite_distances(trk)
+    trkpt = trk.xpath('.//xmlns:trkpt').map do |t|
+      [BigDecimal(t.xpath('@lat').text), BigDecimal(t.xpath('@lon').text)]
+    end
+    distances = trkpt.zip(trkpt.drop(1))[0..-2]
+                    .map { |p| distance(p[0], p[1]) }
+    dist_cumulees = BigDecimal(distance_totale)
+    distances.each do |d|
+      dist_cumulees += d
+      @distances_cumulees << dist_cumulees
+    end
+    self.distance_totale = dist_cumulees.to_i
+  end
+
+  # détermine les heures de début et de fin
+  def calcule_heures_debut_et_fin(doc)
     times = doc.xpath('//xmlns:trkpt//xmlns:time')
     unless times.empty?
       first_time = times.first.text
@@ -133,6 +168,10 @@ class Trace < ApplicationRecord
       self.heure_debut = DateTime.iso8601(first_time) unless first_time.blank?
       self.heure_fin = DateTime.iso8601(last_time) unless last_time.blank?
     end
+  end
+
+  # détermine les coordonnées des points de départ et d'arrivée
+  def calc_coord_depart_et_arrivee(doc)
     trkpt = doc.xpath('//xmlns:trkpt')
     arrivee = trkpt.last
     depart = trkpt.first
@@ -140,17 +179,21 @@ class Trace < ApplicationRecord
     self.long_depart = BigDecimal(depart.xpath('@lon').text)
     self.lat_arrivee = BigDecimal(arrivee.xpath('@lat').text)
     self.long_arrivee = BigDecimal(arrivee.xpath('@lon').text)
+  end
+
+  # traite le profil
+  def traite_profil
     reduction_alt = (altitude_maximum - altitude_minimum) / PRECISION
-    altitudes_pix = altitudes.map do |a|
+    altitudes_pix = @altitudes.map do |a|
       (1000 - (a - altitude_minimum) / reduction_alt).to_i
     end
     reduction_dist = distance_totale / (2 * PRECISION)
-    distances_cumulees_pix = distances_cumulees
+    distances_cumulees_pix = @distances_cumulees
                              .map { |a| (a / reduction_dist).to_i }.unshift(0)
-    self.points = distances_cumulees_pix.zip(altitudes_pix).uniq
-                                        .map { |c| Point.new(distance: c[0], altitude: c[1]) }
-    puts "fin de maj #{Time.now.to_f}"
+    distances_cumulees_pix.zip(altitudes_pix).uniq
+                          .map { |c| Point.new(distance: c[0], altitude: c[1]) }
   end
 
-  private :distance
+  private :distance, :init_trace, :traite_altitudes, :traite_distances,
+          :calcule_heures_debut_et_fin, :calc_coord_depart_et_arrivee, :traite_profil
 end
