@@ -3,7 +3,7 @@ set :repo_url, 'https://github.com/jmarzin/monsaintmoiruby.git'
 set :deploy_to, '/home/deploy/monsaintmoiruby'
 
 set :linked_files, %w{config/database.yml}
-set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 namespace :deploy do
 
