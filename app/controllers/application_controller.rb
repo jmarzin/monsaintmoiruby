@@ -19,6 +19,7 @@ class ApplicationController < ActionController::Base
   # affichage de l'agenda Google
   def agenda
     session[:menu] = 'Dans les jours qui viennent'
+    @agenda = File.read(File.join('public','agenda.txt'))
   end
 
   ##

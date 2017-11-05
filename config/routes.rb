@@ -11,4 +11,5 @@ Rails.application.routes.draw do
   get '/agenda', to: 'application#agenda'
   post '/admin', to: 'admin#check_password'
   root to: 'application#index'
+  get '/agenda/edit', to: 'application#agenda_edit'
 end
