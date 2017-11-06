@@ -67,7 +67,7 @@ class RandonneesController < TracesController
                         .select(:fichier_gpx)
                         .distinct
                         .collect(&:fichier_gpx)
-    gpx_repertoire - gpx_base
+    (gpx_repertoire - gpx_base).sort
   end
 
   # pour garder dans la page la valeur du fichier
