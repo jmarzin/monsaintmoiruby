@@ -22,6 +22,16 @@ class ApplicationController < ActionController::Base
     @agenda = File.read(File.join('public','agenda.txt'))
   end
 
+  def agenda_edit
+    @agenda = File.read(File.join('public','agenda.txt'))
+  end
+
+  def agenda_update
+    @agenda = params[:agenda]
+    File.write(File.join('public', 'agenda.txt'), @agenda)
+    redirect_to agenda_path, notice: "L'agenda a bien été modifié"
+  end
+
   ##
   # chargement d'une image par Tinymce
   def upload_image
