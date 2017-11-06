@@ -116,6 +116,7 @@ class Trace < ApplicationRecord
     end
     calcule_heures_debut_et_fin(doc)
     calc_coord_depart_et_arrivee(doc)
+    self.points.clear
     self.points = traite_profil
   end
 
