@@ -1,5 +1,5 @@
 .container.mt-3
-  %p#alert= alert
+  %p#notice= notice
   = form_tag('/agenda', method: 'post') do
     = label_tag(:agenda, "Texte de l'agenda")
     = text_area_tag :agenda, @agenda.html_safe, :class => 'tinymce', :rows => 10, :cols => 80,
