@@ -43,11 +43,11 @@ class Trek < Trace
     heure_debut = nil
     xml.xpath('//xmlns:trkpt').each do |trkpt|
       next if trkpt.xpath('xmlns:time').text.blank?
-      if heure_debut.nil?
-        heure_debut = Time.parse(trkpt.xpath('xmlns:time').text) if heure_debut.nil?
+      if heure_debut.blank?
+        heure_debut = Time.parse(trkpt.xpath('xmlns:time').text)
       else
         heure = Time.parse(trkpt.xpath('xmlns:time').text)
-        if heure.to_i - heure_debut.to_i >= 60
+        if heure.to_i < heure_debut.to_i || (heure.to_i - heure_debut.to_i) >= 60
           heure_debut = heure
         else
           trkpt.remove
