@@ -9,7 +9,7 @@
     %nav
       %ul.pagination.justify-content-center
         %li.page-item{ :class => (@page_a_afficher == 1) ? 'disabled' : '' }
-          %a.page-link{ :href =>  randonnees_trek_page_path(@idtrek, @page_a_afficher - 1),
+          %a.page-link{ :href =>  randonnees_trek_page_path(param[:id], @page_a_afficher - 1),
            :tabindex => '-1' }
             Précédent
         - (1..@nb_pages).each do |i|
@@ -20,9 +20,9 @@
                 %span.sr-only (current)
           - else
             %li.page-item
-              %a.page-link{ :href => randonnees_trek_page_path(@idtrek, i) } #{i}
+              %a.page-link{ :href => randonnees_trek_page_path(param[:id], i) } #{i}
         %li.page-item{ :class => (@page_a_afficher == @nb_pages) ? 'disabled' : '' }
-          %a.page-link{ :href => randonnees_trek_page_path(@idtrek, @page_a_afficher + 1),
+          %a.page-link{ :href => randonnees_trek_page_path(param[:id], @page_a_afficher + 1),
            :tabindex => '+1' }
             Suivant
   =render 'traces/index'
