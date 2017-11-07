@@ -10,16 +10,16 @@ class RandonneesController < TracesController
   # GET /randonnees/trek/1/page/1
   # affiche la liste des randonnees du trek d'id 1
   def trek_index
-    @itrek = params[:id].to_i
     @trace = Trek.where(id: @idtrek)
     # traitement du cas où la trace indiquée n'est pas un trek
     if @trace.empty?
       return redirect_to treks_url,
                          notice: "le trek #{params[:id].to_i} n'existe pas."
     end
+    @trace = @trace.first
     # traitement du cas nominal
     return if (@page_a_afficher = corrige_page? do
-                 @trace.first.randonnees.order(heure_debut: :desc)
+                 @trace.randonnees.order(heure_debut: :desc)
                end).nil?
     @traces = @traces.to_a.slice((@page_a_afficher - 1) * TAILLE_PAGE,
                                  TAILLE_PAGE)
