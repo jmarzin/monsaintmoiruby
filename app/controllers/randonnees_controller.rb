@@ -10,7 +10,8 @@ class RandonneesController < TracesController
   # GET /randonnees/trek/1/page/1
   # affiche la liste des randonnees du trek d'id 1
   def trek_index
-    @trace = Trek.where(id: params[:id].to_i)
+    @itrek = params[:id].to_i
+    @trace = Trek.where(id: @idtrek)
     # traitement du cas où la trace indiquée n'est pas un trek
     if @trace.empty?
       return redirect_to treks_url,
