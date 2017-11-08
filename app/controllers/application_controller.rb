@@ -3,8 +3,7 @@
 # elle comprend les fonctions non liées à un model
 # qui ne relèvent pas de l'administrateur
 class ApplicationController < ActionController::Base
-  protect_from_forgery with: :exception
-  skip_before_action :verify_authenticity_token, only: %i[upload_image]
+  protect_from_forgery except: :upload_image
 
   ##
   # affichage de la page d'accueil
