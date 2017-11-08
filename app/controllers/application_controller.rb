@@ -4,6 +4,7 @@
 # qui ne relèvent pas de l'administrateur
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
+  skip_before_action :verify_authenticity_token, only: :upload_image
 
   ##
   # affichage de la page d'accueil
