@@ -3,7 +3,7 @@
 # elle comprend les fonctions non liées à un model
 # qui ne relèvent pas de l'administrateur
 class ApplicationController < ActionController::Base
-  protect_from_forgery except: :upload_image
+  protect_from_forgery unless: -> { request.format.json? }
 
   ##
   # affichage de la page d'accueil
