@@ -25,7 +25,7 @@
             .col-md-3.child
             .col-md-6.child
               =image_tag(File.join('/materiels',materiel.photo), :class => 'card-img-top img-fluid',
-                :alt => materiel.nom, :style => 'height: 100px;')
+                :alt => materiel.nom, :style => 'max-height: 100px; width: auto')
           .card-block
             %p.card-text(style="height: 100px;")
               =materiel.description_courte
