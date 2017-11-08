@@ -64,7 +64,7 @@ class MaterielsController < ApplicationController
 
   private
 
-  # dresse la liste des photos candidats pour un matériels.
+  # dresse la liste des photos candidats pour un matériel.
   # elle comprend les photos du répertoire matériels qui ne
   # sont pas encore assignées à un matériel
   def photos_candidates
@@ -77,7 +77,7 @@ class MaterielsController < ApplicationController
                           .select(:photo)
                           .distinct
                           .collect(&:photo)
-    (photos_repertoire - photos_base).collect { |p| [p, p] }
+    (photos_repertoire - photos_base).sort.collect { |p| [p, p] }
   end
 
   # définit le matériel utilisé
