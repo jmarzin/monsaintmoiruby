@@ -20,6 +20,9 @@
       = f.label :sous_titre
       = f.text_field :sous_titre
     .field
+      = f.label :moyen
+      = f.select :moyen, options_for_select([['A pied', 'P'], ['En vélo', 'V']], @trace.moyen)
+    .field
       = f.label :description
       = f.text_area :description, :class => 'tinymce', :rows => 10, :cols => 80,
        :id => 'mytextarea'

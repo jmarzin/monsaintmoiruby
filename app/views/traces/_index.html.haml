@@ -9,6 +9,10 @@
           .card-text
             .mapidL{ id: "mapid#{trace.id}" }
           %p
+            -if trace.moyen=='V'
+              %i.fa.fa-bicycle
+            -else
+              %i.fa.fa-male
             %i.fa.fa-arrow-right
             #{trace.distance_totale.to_f/1000} km
             %i.fa.fa-arrow-up

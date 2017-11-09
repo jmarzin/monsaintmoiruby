@@ -13,6 +13,10 @@
     =@trace.titre
   %h3.text-center
     =@trace.sous_titre
+  -if @trace.moyen=='V'
+    %i.fa.fa-bicycle
+  -else
+    %i.fa.fa-male
   .row
     .col-md-4
       - if @trace.heure_debut.nil?

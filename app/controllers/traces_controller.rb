@@ -155,7 +155,7 @@ class TracesController < ApplicationController
                   :altitude_maximum, :ascension_totale,
                   :descente_totale, :heure_debut, :heure_fin,
                   :distance_totale, :lat_depart, :long_depart,
-                  :lat_arrivee, :long_arrivee, :type,
+                  :lat_arrivee, :long_arrivee, :type, :moyen,
                   :repertoire_photos, points: %i[distance altitude],
                                       materiels: [], gpx_candidats: [])
   end

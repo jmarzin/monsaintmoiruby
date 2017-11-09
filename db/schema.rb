@@ -10,10 +10,39 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171028195212) do
+ActiveRecord::Schema.define(version: 20171109194320) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "gpx", id: :serial, force: :cascade do |t|
+    t.bigint "idtrek"
+    t.text "titre", null: false
+    t.text "soustitre", null: false
+    t.text "description", null: false
+    t.text "listematos"
+    t.text "nomfichier"
+    t.integer "altitudeminimum"
+    t.integer "altitudemaximum"
+    t.integer "ascensiontotale"
+    t.integer "descentetotale"
+    t.text "heuredebut", null: false
+    t.text "heurefin", null: false
+    t.integer "distancetotale"
+    t.text "depart"
+    t.text "arrivee"
+    t.text "coordonneespix"
+    t.string "typegpx", limit: 1
+    t.text "repertoirephotos"
+  end
+
+  create_table "materiel", id: :serial, force: :cascade do |t|
+    t.text "nom", null: false
+    t.text "description", null: false
+    t.text "photo", null: false
+    t.integer "poids", null: false
+    t.boolean "reforme"
+  end
 
   create_table "materiels", id: :serial, force: :cascade do |t|
     t.string "nom"
@@ -29,6 +58,15 @@ ActiveRecord::Schema.define(version: 20171028195212) do
     t.bigint "trace_id"
     t.bigint "materiel_id"
     t.index ["trace_id"], name: "index_materiels_traces_on_trace_id"
+  end
+
+  create_table "play_evolutions", id: :integer, default: nil, force: :cascade do |t|
+    t.string "hash", limit: 255, null: false
+    t.datetime "applied_at", null: false
+    t.text "apply_script"
+    t.text "revert_script"
+    t.string "state", limit: 255
+    t.text "last_problem"
   end
 
   create_table "points", force: :cascade do |t|
@@ -56,10 +94,10 @@ ActiveRecord::Schema.define(version: 20171028195212) do
     t.decimal "lat_arrivee"
     t.decimal "long_arrivee"
     t.string "type"
-    t.string "repertoire_photos"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-
+    t.string "repertoire_photos"
+    t.string "moyen"
     t.index ["traces_id"], name: "index_traces_on_traces_id"
   end
 
