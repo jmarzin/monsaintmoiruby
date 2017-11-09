@@ -28,7 +28,7 @@ class MaterielsController < ApplicationController
 
   # GET /materiels/1/edit
   def edit
-    @photos_candidates = photos_candidates << @materiel.photo
+    @photos_candidates = photos_candidates
   end
 
   # POST /materiels
@@ -73,7 +73,7 @@ class MaterielsController < ApplicationController
                            .reject do |f|
                              File.directory? File.join(repertoire, f)
                            end
-    photos_base = Materiel.where.not(photo: '0pasdimage.jpg')
+    photos_base = Materiel.where.not(photo: '0pasdimage.jpg', id: @materiel.id)
                           .select(:photo)
                           .distinct
                           .collect(&:photo)
