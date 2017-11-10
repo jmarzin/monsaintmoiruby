@@ -19,7 +19,8 @@ class TreksController < TracesController
         repertoire = Rails.root.join('public', 'images', randonnee.repertoire_photos)
         photos = Dir.entries(repertoire)
         unless photos.empty?
-          @photos += photos.select {|f| File.extname(f).casecmp('.JPG').zero?}
+          @photos += photos.sort
+                           .select {|f| File.extname(f).casecmp('.JPG').zero?}
                            .map {|f| File.join('/images', randonnee.repertoire_photos, f)}
         end
       end
