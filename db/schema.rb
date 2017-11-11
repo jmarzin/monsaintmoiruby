@@ -63,9 +63,4 @@ ActiveRecord::Schema.define(version: 20171109194320) do
     t.index ["traces_id"], name: "index_traces_on_traces_id"
   end
 
-  create_table "trekmateriel", id: :serial, force: :cascade do |t|
-    t.bigint "idtrek"
-    t.bigint "idmateriel"
-  end
-
 end

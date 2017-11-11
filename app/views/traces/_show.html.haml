@@ -22,7 +22,7 @@
       - if @trace.heure_debut.nil?
         Date et heure de départ inconnues
       - else
-        Départ le #{l(@trace.heure_debut.localtime, format: '%a %-d %b %Y')}
+        Départ le #{l(@trace.heure_debut.localtime, format: '%a %-d %b %Y à %Hh%M')}
     .col-md-2
       %i.fa.fa-arrow-right
       -if !@trace.distance_totale.blank?
@@ -40,7 +40,7 @@
       - if @trace.heure_fin.nil?
         Date et heure d'arrivée inconnues
       - else
-        Arrivée le #{l(@trace.heure_fin.localtime, format: '%a %-d %b %Y')}
+        Arrivée le #{l(@trace.heure_fin.localtime, format: '%a %-d %b %Y à %Hh%M')}
     .col-md-2
     .col-md-3
       Altitude maximum :

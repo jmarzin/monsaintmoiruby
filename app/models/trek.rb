@@ -11,11 +11,29 @@ class Trek < Trace
                                                                    gpx[0].is_a?(String)
     resultat = construit_fichier_fusionne(gpx)
     xml = Nokogiri::XML(resultat)
-    maj_apres_lecture(xml)
+    maj_sql(gpx)
     xml = simplifie_fichier(xml)
     resultat = xml.to_s.gsub(/^ +\n/, '')
     resultat = maj_bounds(xml, resultat)
     ecrit_fichier(resultat)
+  end
+
+  #
+  # calcule les caractéristiques du trek à partir
+  # de celles des randonnées
+  def maj_sql(gpx)
+    traces = Trace.where(fichier_gpx: gpx).distinct.order(:heure_debut)
+    self.altitude_minimum = traces.minimum('altitude_minimum')
+    self.altitude_maximum = traces.maximum('altitude_maximum')
+    self.ascension_totale = traces.sum('ascension_totale')
+    self.descente_totale = traces.sum('descente_totale')
+    self.heure_debut = traces.first.heure_debut
+    self.heure_fin = traces.last.heure_fin
+    self.distance_totale = traces.sum('distance_totale')
+    self.lat_depart = traces.first.lat_depart
+    self.long_depart = traces.first.long_depart
+    self.lat_arrivee = traces.last.lat_arrivee
+    self.long_arrivee = traces.last.long_arrivee
   end
 
   # construit un nouvelle chaîne qui cumule

@@ -98,15 +98,9 @@ class Trace < ApplicationRecord
   # met à jour les caractéristiques de la randonnées et construit
   # le profil après ouverture du fichier gpx
   def maj
-    @doc = File.open(File.join('public', 'gpx',
+    doc = File.open(File.join('public', 'gpx',
                                self.class == Randonnee ? 'randos' : 'treks',
                                fichier_gpx)) { |f| Nokogiri::XML(f) }
-    maj_apres_lecture(@doc)
-  end
-
-  # met à jour les caractéristiques de la randonnées et construit
-  # le profil à partir du fichier gpx ouvert
-  def maj_apres_lecture(doc)
     init_trace
     @altitudes = []
     @distances_cumulees = []
