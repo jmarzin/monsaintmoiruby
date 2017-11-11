@@ -39,6 +39,8 @@ class TracesController < ApplicationController
         @trace.points << Point.new(distance: pa[:distance].to_i, altitude: pa[:altitude].to_i)
       end
     end
+    creer_rep_photos(params[:creer_rep_photos]) unless params[:creer_rep_photos].blank?
+    charge_photos_si_besoin
     @trace.materiel_ids = params[@class_symbol][:materiel_ids]
     @gpx_avant = params[:gpx_avant]
     fichier_gpx = traite_traces_si_besoin
@@ -60,6 +62,8 @@ class TracesController < ApplicationController
 
   # PATCH/PUT /traces/1
   def update
+    creer_rep_photos(params[:creer_rep_photos]) unless params[:creer_rep_photos].blank?
+    charge_photos_si_besoin
     @gpx_avant = params[:gpx_avant]
     fichier_gpx = traite_traces_si_besoin
     @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
@@ -74,7 +78,30 @@ class TracesController < ApplicationController
     end
   end
 
+  # renvoi dans le champ res le nombre de photos du répertoire sélectionné
+  def photos_number
+    if params[:rep].blank?
+      render js: "$('strong#res').text('');"
+    else
+      repertoire = Rails.root.join('public', 'images', params[:rep])
+      photos = Dir.entries(repertoire)
+                           .select do |f|
+        (!File.directory? File.join(repertoire, f)) &&
+            File.extname(f).casecmp('.jpg').zero?
+      end
+      render js: "$('strong#res').text('#{photos.size}');"
+    end
+  end
+
   private
+
+  #
+  # crée le répertoire photo si nécessaire
+  def creer_rep_photos(rep)
+    repertoire = Rails.root.join('public', 'images', rep)
+    Dir.mkdir(repertoire) unless Dir.exist?(repertoire)
+    @trace.repertoire_photos = rep
+  end
 
   # initialise les variables nécessaires à la construction
   # de la page à afficher
@@ -157,7 +184,23 @@ class TracesController < ApplicationController
                   :descente_totale, :heure_debut, :heure_fin,
                   :distance_totale, :lat_depart, :long_depart,
                   :lat_arrivee, :long_arrivee, :type, :moyen,
-                  :repertoire_photos, points: %i[distance altitude],
-                                      materiels: [], gpx_candidats: [])
+                  :repertoire_photos, :creer_rep_photos,
+                  points: %i[distance altitude], materiels: [],
+                  gpx_candidats: [])
+  end
+
+  # charge les photos sélectionnées par l'utilisateur sur son pdt
+  def charge_photos_si_besoin
+    uploaded_io = params[:upload_photos]
+    if uploaded_io.nil? || @trace.repertoire_photos.blank?
+      nil
+    else
+      for photo in uploaded_io do
+        File.open(Rails.root.join('public', 'images', @trace.repertoire_photos,
+                                  photo.original_filename), 'wb') do |file|
+          file.write(photo.read)
+        end
+      end
+    end
   end
 end

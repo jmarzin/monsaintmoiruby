@@ -13,4 +13,5 @@ Rails.application.routes.draw do
   root to: 'application#index'
   get '/agenda/edit', to: 'application#agenda_edit'
   post '/agenda', to: 'application#agenda_update'
+  get '/photos_number/(:rep)', to: 'traces#photos_number', as: 'photos_number'
 end

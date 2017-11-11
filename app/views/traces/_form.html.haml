@@ -84,7 +84,15 @@
       = f.label :repertoire_photos
       = f.select :repertoire_photos,
         options_for_select(@rep_photos_candidats.map { |r| [r, r] }, @trace.repertoire_photos),
-        include_blank: :true
+          {include_blank: :true}, {:onChange => 'changerep();'}
+      = link_to 'Nombre de photos ?', photos_number_path(''), id: 'bouton',remote: true, class: 'btn-info'
+      %strong#res
+    .field
+      =label_tag :creer_rep_photos, 'Répertoire à créer'
+      =text_field_tag :creer_rep_photos
+    .field
+      =label_tag :upload_photos, 'Photos à télécharger'
+      =file_field_tag 'upload_photos[]', accept: '.jpg', multiple: true
     .field
       = f.label :materiels_ids, 'Matériels emportés'
       %ul.list-unstyled

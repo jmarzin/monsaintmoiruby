@@ -65,3 +65,9 @@ function afficheCarte(champ, fichier, depart, arrivee) {
     L.marker([arrivee.split(",")[0], arrivee.split(",")[1]], {icon: arriveeIcon})
         .addTo(mymap);
 }
+
+function changerep() {
+    var dest = "/photos_number/" + $( "select#randonnee_repertoire_photos option:checked" ).val();
+    $("a#bouton").attr("href", dest);
+    $("a#bouton").click()
+}
