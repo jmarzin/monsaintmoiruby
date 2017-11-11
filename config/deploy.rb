@@ -1,3 +1,11 @@
+##
+# le fichier de paramétrage de nginx est dans /etc/nginx (modifiable sous root)
+# le fichier de logs de nginx est dans /var/logs/nginx (accessible sous root)
+# pour migrer la base faire       RAILS_ENV=production rails db:migrate
+# pour compiler les assets faire  RAILS_ENV=production rails assets:precompile
+# pour lancer le serveur faire    bundle exec puma -e production -d --pidfile RUNNINGPID
+# pour relancer le serveur faire  kill -s SIGUSR2 `cat RUNNINGPID`
+# pour arrêter le serveur faire   kill -s SIGTERM `cat RUNNINGPID`
 set :repo_url, 'https://github.com/jmarzin/monsaintmoiruby.git'
 
 set :deploy_to, '/home/deploy/monsaintmoiruby'
