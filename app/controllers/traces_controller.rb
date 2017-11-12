@@ -4,9 +4,10 @@ class TracesController < ApplicationController
   # GET /traces
   def index
     return if (@page_a_afficher = corrige_page? do
-                 Trace.where(type: controller_name.classify)
-                     .order(heure_debut: :desc)
-               end).nil?
+      Trace.where('type = ? AND titre != ?', controller_name.classify,
+                                             'Le projet')
+           .order(heure_debut: :desc)
+    end).nil?
     @traces = @traces.to_a.slice((@page_a_afficher - 1) *
                                  TAILLE_PAGE, TAILLE_PAGE)
   end
@@ -19,8 +20,8 @@ class TracesController < ApplicationController
       @photos = Dir.entries(repertoire)
       unless @photos.empty?
         @photos = @photos.sort
-                         .select {|f| File.extname(f).casecmp('.JPG').zero?}
-                         .map {|f| File.join('/images', @trace.repertoire_photos, f)}
+                         .select { |f| File.extname(f).casecmp('.JPG').zero? }
+                         .map { |f| File.join('/images', @trace.repertoire_photos, f) }
       end
     end
   end
@@ -85,9 +86,9 @@ class TracesController < ApplicationController
     else
       repertoire = Rails.root.join('public', 'images', params[:rep])
       photos = Dir.entries(repertoire)
-                           .select do |f|
+                  .select do |f|
         (!File.directory? File.join(repertoire, f)) &&
-            File.extname(f).casecmp('.jpg').zero?
+          File.extname(f).casecmp('.jpg').zero?
       end
       render js: "$('strong#res').text('#{photos.size}');"
     end
@@ -112,12 +113,12 @@ class TracesController < ApplicationController
   end
 
   # corrige la page demandée si nécessaire
-  def corrige_page? &requete
+  def corrige_page?
     if params[:idpage].nil?
       redirect_to action: action_name, idpage: 1
       nil
     else
-      @traces = requete.call
+      @traces = yield
       @nb_pages = [((@traces.size + TAILLE_PAGE) / TAILLE_PAGE).floor, 1].max
       if params[:idpage].to_i > @nb_pages
         redirect_to action: action_name, id: params[:id], idpage: @nb_pages
@@ -156,10 +157,10 @@ class TracesController < ApplicationController
     @trace = Trace.where(id: params[:id])
     if @trace.empty?
       redirect_back fallback_location: root_path,
-             notice: "La trace #{params[:id]} n'existe pas"
+                    notice: "La trace #{params[:id]} n'existe pas"
     elsif @trace.first.class.to_s.downcase.to_sym != @class_symbol
       redirect_back fallback_location: root_path,
-             notice: "La trace #{params[:id]} n'est pas du type #{@class_symbol.to_s}"
+                    notice: "La trace #{params[:id]} n'est pas du type #{@class_symbol}"
     end
     @trace = @trace.first
   end

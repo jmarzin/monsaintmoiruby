@@ -34,6 +34,25 @@ class Trek < Trace
     self.long_depart = traces.first.long_depart
     self.lat_arrivee = traces.last.lat_arrivee
     self.long_arrivee = traces.last.long_arrivee
+    @distances_cumulees = []
+    dcumul = 0
+    dist_prec = 0
+    @altitudes = []
+    for trace in traces.order(:heure_debut) do
+      reduction_dist = trace.distance_totale / (2 * PRECISION)
+      reduction_alt = (trace.altitude_maximum - trace.altitude_minimum) / PRECISION
+      for point in trace.points.order(:distance) do
+        dist = dist_prec + point.distance * reduction_dist
+        @distances_cumulees << dist
+        puts dist
+        alt = trace.altitude_minimum - (point.altitude - 1000) * reduction_alt
+        puts alt
+        @altitudes << alt
+      end
+      dist_prec = @distances_cumulees.last
+    end
+    self.points.clear
+    self.points = traite_profil
   end
 
   # construit un nouvelle chaîne qui cumule
