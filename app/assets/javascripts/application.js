@@ -43,16 +43,6 @@ function afficheCarte(champ, fichier, depart, arrivee) {
             return { color: '#f00' };
         }
     });
-    var departIcon = L.icon({
-        iconUrl: '/departS.png',
-        iconSize:     [40, 40],
-        iconAnchor:   [15, 37]
-    });
-    var arriveeIcon = L.icon({
-        iconUrl: '/arriveeS.png',
-        iconSize:     [40, 40],
-        iconAnchor:   [36, 39]
-    });
     var runLayer = omnivore.gpx(fichier, null, customLayer)
         .on('ready', function() {
             mymap.fitBounds(runLayer.getBounds());
@@ -60,14 +50,35 @@ function afficheCarte(champ, fichier, depart, arrivee) {
         .on('click', function() {
             $('#profilModal').modal('toggle'); })
         .addTo(mymap);
-    L.marker([depart.split(",")[0], depart.split(",")[1]], {icon: departIcon})
-        .addTo(mymap);
-    L.marker([arrivee.split(",")[0], arrivee.split(",")[1]], {icon: arriveeIcon})
-        .addTo(mymap);
+    if (depart !== '' && arrivee !== '') {
+        var departIcon = L.icon({
+            iconUrl: '/departS.png',
+            iconSize: [40, 40],
+            iconAnchor: [15, 37]
+        });
+        var arriveeIcon = L.icon({
+            iconUrl: '/arriveeS.png',
+            iconSize: [40, 40],
+            iconAnchor: [36, 39]
+        });
+        L.marker([depart.split(",")[0], depart.split(",")[1]], {icon: departIcon})
+            .addTo(mymap);
+        L.marker([arrivee.split(",")[0], arrivee.split(",")[1]], {icon: arriveeIcon})
+            .addTo(mymap);
+    }
 }
 
 function changerep() {
     var dest = "/photos_number/" + $( "select#randonnee_repertoire_photos option:checked" ).val();
-    $("a#bouton").attr("href", dest);
-    $("a#bouton").click()
+    $("a#bouton").attr("href", dest).click();
+}
+
+function afficheMap() {
+    $("div#mapid").remove();
+    var selection = $( 'select#randonnee_fichier_gpx option:checked' ).val();
+    if (selection !== '') {
+        $("div.mapid").html("<div id='mapid'></div>");
+        var fichier = "/gpx/randos/" + selection;
+        afficheCarte('mapid', fichier, '', '');
+    }
 }

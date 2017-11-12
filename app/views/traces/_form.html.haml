@@ -34,6 +34,8 @@
         = f.select :fichier_gpx,
          options_for_select(@gpx_candidats.map { |g| [g, g]}, @trace.fichier_gpx),
          include_blank: :true
+        %button.btn.btn-info{ type: 'button', 'data-toggle': 'modal',  'data-target': '#mapModal', onClick: 'afficheMap();' } Voir la trace
+        .mapid
         .field
           = f.label :nouveau_fichier_gpx
           = f.file_field :nouveau_fichier_gpx, accept: '.gpx'
