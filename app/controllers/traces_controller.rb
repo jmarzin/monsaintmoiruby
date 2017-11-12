@@ -1,5 +1,5 @@
 class TracesController < ApplicationController
-  TAILLE_PAGE = 9
+  TAILLE_PAGE = 12
 
   # GET /traces
   def index

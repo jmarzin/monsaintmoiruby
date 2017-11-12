@@ -4,7 +4,7 @@
     =link_to '', new_randonnee_path, class: 'btn btn-link fa fa-plus'
   - if @nb_pages > 1
     %nav
-      %ul.pagination.justify-content-center
+      %ul.pagination.pagination-sm.justify-content-center
         %li.page-item{ :class => (@page_a_afficher == 1) ? 'disabled' : '' }
           %a.page-link{ :href =>  randonnees_page_path(@page_a_afficher - 1), :tabindex => '-1' }
             Précédent
