@@ -35,7 +35,6 @@ class Trek < Trace
     self.lat_arrivee = traces.last.lat_arrivee
     self.long_arrivee = traces.last.long_arrivee
     @distances_cumulees = []
-    dcumul = 0
     dist_prec = 0
     @altitudes = []
     for trace in traces.order(:heure_debut) do
