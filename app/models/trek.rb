@@ -22,7 +22,7 @@ class Trek < Trace
   # calcule les caractéristiques du trek à partir
   # de celles des randonnées
   def maj_sql(gpx)
-    traces = Trace.where(fichier_gpx: gpx).distinct.order(:heure_debut)
+    traces = Trace.where(fichier_gpx: gpx).order(:heure_debut)
     self.altitude_minimum = traces.minimum('altitude_minimum')
     self.altitude_maximum = traces.maximum('altitude_maximum')
     self.ascension_totale = traces.sum('ascension_totale')
@@ -44,9 +44,7 @@ class Trek < Trace
       for point in trace.points.order(:distance) do
         dist = dist_prec + point.distance * reduction_dist
         @distances_cumulees << dist
-        puts dist
         alt = trace.altitude_minimum - (point.altitude - 1000) * reduction_alt
-        puts alt
         @altitudes << alt
       end
       dist_prec = @distances_cumulees.last
