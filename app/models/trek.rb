@@ -5,24 +5,48 @@ class Trek < Trace
                         dependent: :nullify
   # fusionne les gpx fournis
   # retourne le nom du fichier créé
-  def fusionne(gpx)
+  def fusionne(gpx, gpx_avant)
     raise 'la méthode fusionne attend un tableau de String' unless gpx.is_a?(Array) &&
                                                                    !gpx.empty? &&
                                                                    gpx[0].is_a?(String)
     resultat = construit_fichier_fusionne(gpx)
     xml = Nokogiri::XML(resultat)
-    maj_sql(gpx)
+    maj_sql(gpx, gpx_avant)
     xml = simplifie_fichier(xml)
     resultat = xml.to_s.gsub(/^ +\n/, '')
     resultat = maj_bounds(xml, resultat)
     ecrit_fichier(resultat)
   end
 
-  #
   # calcule les caractéristiques du trek à partir
   # de celles des randonnées
-  def maj_sql(gpx)
-    traces = Trace.where(fichier_gpx: gpx).order(:heure_debut)
+  def maj_sql(gpx, gpx_avant)
+    traces = Trace.where(fichier_gpx: gpx)
+    # préparation des profils à concaténer
+    traces_a_traiter = prepare_traces(traces, gpx_avant)
+    # traitement des profils
+    @distances_cumulees = []
+    dist_prec = 0
+    @altitudes = []
+    traces_a_traiter.each do |trace|
+      reduction_dist = trace.distance_totale / (2 * PRECISION)
+      reduction_alt = (trace.altitude_maximum - trace.altitude_minimum) / PRECISION
+      trace.points.order(:distance).each do |point|
+        dist = dist_prec + point.distance * reduction_dist
+        @distances_cumulees << dist
+        alt = trace.altitude_minimum - (point.altitude - 1000) * reduction_alt
+        @altitudes << alt
+      end
+      dist_prec = @distances_cumulees.last
+    end
+    maj_donnees_trek(traces)
+    points.clear
+    self.points = traite_profil
+  end
+
+  # mise à jour des données du trek
+  # à partir des données des randonnées
+  def maj_donnees_trek(traces)
     self.altitude_minimum = traces.minimum('altitude_minimum')
     self.altitude_maximum = traces.maximum('altitude_maximum')
     self.ascension_totale = traces.sum('ascension_totale')
@@ -34,22 +58,29 @@ class Trek < Trace
     self.long_depart = traces.first.long_depart
     self.lat_arrivee = traces.last.lat_arrivee
     self.long_arrivee = traces.last.long_arrivee
-    @distances_cumulees = []
-    dist_prec = 0
-    @altitudes = []
-    for trace in traces.order(:heure_debut) do
-      reduction_dist = trace.distance_totale / (2 * PRECISION)
-      reduction_alt = (trace.altitude_maximum - trace.altitude_minimum) / PRECISION
-      for point in trace.points.order(:distance) do
-        dist = dist_prec + point.distance * reduction_dist
-        @distances_cumulees << dist
-        alt = trace.altitude_minimum - (point.altitude - 1000) * reduction_alt
-        @altitudes << alt
+  end
+
+  #
+  # si on ne fait qu'ajouter des randonnees à celles du trek
+  # existant, on part du gpx du trek qu'on complète, sinon on part du gpx de
+  # toutes les randonnées qui constituent le trek
+  def prepare_traces(traces, gpx_avant)
+    traces_a_traiter = traces.map { |t| gpx_avant.include?(t.fichier_gpx) ? nil : t}
+    nb_traces = 0
+    traces_a_traiter.each do |t|
+      if t.nil?
+        nb_traces += 1
+      else
+        break
       end
-      dist_prec = @distances_cumulees.last
     end
-    self.points.clear
-    self.points = traite_profil
+    if nb_traces == gpx_avant.size
+      traces_a_traiter.reject{ |t| t.nil? }.
+                       sort{ |x,y| x.heure_debut <=> y.heure_debut }.
+                       unshift(self)
+    else
+      traces.order(:heure_debut)
+    end
   end
 
   # construit un nouvelle chaîne qui cumule
@@ -113,5 +144,5 @@ class Trek < Trace
     "#{nom_fichier}.gpx"
   end
 
-  private :construit_fichier_fusionne, :simplifie_fichier, :maj_bounds, :ecrit_fichier
+  private :construit_fichier_fusionne, :simplifie_fichier, :maj_bounds, :ecrit_fichier, :maj_sql
 end

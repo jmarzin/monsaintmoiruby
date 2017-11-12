@@ -83,7 +83,7 @@ class TreksController < TracesController
   # uniquement si c'est nécessaire
   def traite_traces_si_besoin
     @gpx_apres = @trace.randonnees.collect(&:fichier_gpx).sort
-    ((@gpx_avant <=> @gpx_apres).zero? || @gpx_apres.empty?) ? nil : @trace.fusionne(@gpx_apres)
+    ((@gpx_avant <=> @gpx_apres).zero? || @gpx_apres.empty?) ? nil : @trace.fusionne(@gpx_apres, @gpx_avant)
   end
 
   # détermine l'item du menu qui doit être mis en évidence

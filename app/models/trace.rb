@@ -184,7 +184,7 @@ class Trace < ApplicationRecord
     end
     reduction_dist = distance_totale / (2 * PRECISION)
     distances_cumulees_pix = @distances_cumulees
-                             .map { |a| (a / reduction_dist).to_i }.unshift(0)
+                             .map { |a| (a / reduction_dist).to_i }
     distances_cumulees_pix.zip(altitudes_pix).uniq
                           .map { |c| Point.new(distance: c[0], altitude: c[1]) }
   end
