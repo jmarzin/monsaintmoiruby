@@ -59,7 +59,7 @@ class TreksController < TracesController
   # DELETE /treks/1
   def destroy
     fichier = File.join('public', 'gpx', 'treks', "#{@trace.id}.gpx")
-    File.delete(fichier)
+    File.delete(fichier) if File.exists?(fichier)
     @trace.destroy
     redirect_to treks_url, notice: 'La randonnée a bien été supprimée.'
   end
