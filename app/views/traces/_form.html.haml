@@ -1,5 +1,5 @@
 .container.mt-3
-  = form_for @trace do |f|
+  = form_for @trace, :html => { :multipart => true } do |f|
     - if @trace.errors.any?
       #error_explanation
         %h2

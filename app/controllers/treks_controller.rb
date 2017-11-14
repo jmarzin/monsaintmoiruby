@@ -9,21 +9,16 @@ class TreksController < TracesController
 
   # GET /treks/1
   def show
-    unless @trace.repertoire_photos.blank?
-      super
-      return
-    end
-    @photos = []
-    for randonnee in @trace.randonnees
-      unless randonnee.repertoire_photos.blank?
-        repertoire = Rails.root.join('public', 'images', randonnee.repertoire_photos)
-        photos = Dir.entries(repertoire)
-        unless photos.empty?
-          @photos += photos.sort
-                           .select {|f| File.extname(f).casecmp('.JPG').zero?}
-                           .map {|f| File.join('/images', randonnee.repertoire_photos, f)}
-        end
+    if @trace.repertoire_photos.blank?
+      @photos = []
+      @trace.randonnees.reject { |r| r.repertoire_photos.blank? }.each do |r|
+        repertoire = Rails.root.join('public', 'images', r.repertoire_photos)
+        @photos += Dir.entries(repertoire).sort
+                       .select { |f| File.extname(f).casecmp('.JPG').zero? }
+                       .map { |f| File.join('/images', r.repertoire_photos, f) }
       end
+    else
+      super
     end
   end
 
@@ -59,7 +54,7 @@ class TreksController < TracesController
   # DELETE /treks/1
   def destroy
     fichier = File.join('public', 'gpx', 'treks', "#{@trace.id}.gpx")
-    File.delete(fichier) if File.exists?(fichier)
+    File.delete(fichier) if File.exist?(fichier)
     @trace.destroy
     redirect_to treks_url, notice: 'La randonnée a bien été supprimée.'
   end
@@ -83,7 +78,7 @@ class TreksController < TracesController
   # uniquement si c'est nécessaire
   def traite_traces_si_besoin
     @gpx_apres = @trace.randonnees.collect(&:fichier_gpx).sort
-    ((@gpx_avant <=> @gpx_apres).zero? || @gpx_apres.empty?) ? nil : @trace.fusionne(@gpx_apres, @gpx_avant)
+    (@gpx_avant <=> @gpx_apres).zero? || @gpx_apres.empty? ? nil : @trace.fusionne(@gpx_apres, @gpx_avant)
   end
 
   # détermine l'item du menu qui doit être mis en évidence
