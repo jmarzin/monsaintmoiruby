@@ -25,7 +25,7 @@ class AdminController < ApplicationController
       t.points.order(:distance).each do |p|
         profil << [p.distance, p.altitude]
       end
-      t.polylines = [profil]
+      t.polylines = [profil].to_json
       t.save
     end
     redirect_to root_url, notice: 'Mise à jour effectuée.'
