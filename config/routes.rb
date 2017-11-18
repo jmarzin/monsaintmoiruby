@@ -14,4 +14,5 @@ Rails.application.routes.draw do
   get '/agenda/edit', to: 'application#agenda_edit'
   post '/agenda', to: 'application#agenda_update'
   get '/photos_number/(:rep)', to: 'traces#photos_number', as: 'photos_number'
+  get '/maj', to: 'admin#maj_polylines'
 end

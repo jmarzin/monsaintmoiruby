@@ -95,11 +95,8 @@
               .row
                 %svg{ :height => '100%', :width => '100%', :viewBox => '0 0 2000 1000',
                   :preserveAspectRatio => 'xMidYMid meet' }
-                  - if !@trace.points.empty?
-                    - pts = ''
-                    - @trace.points.order(:id).each do |p|
-                      -pts += p.distance.to_s + ',' + p.altitude.to_s + ' '
-                    %polyline{ :points => raw(pts), :style => 'fill: none;stroke: #f00;stroke-width: 8' }
+                  -@profils.each do |p|
+                    %polyline{ :points => p, :style => 'fill: none;stroke: #f00;stroke-width: 8' }
           .modal-footer
             %button.btn.btn-default{:type => 'button', :'data-dismiss' => 'modal' } Close
     #mapid

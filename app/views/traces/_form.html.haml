@@ -9,6 +9,7 @@
           - @trace.errors.full_messages.each do |message|
             %li= message
     -if @garder_points
+      = f.hidden_field :polylines
       = f.fields_for :points  do |f_points|
         = f_points.hidden_field :distance
         = f_points.hidden_field :altitude

@@ -31,17 +31,22 @@ class Trek < Trace
     traces_a_traiter.each do |trace|
       reduction_dist = trace.distance_totale / (2 * PRECISION)
       reduction_alt = (trace.altitude_maximum - trace.altitude_minimum) / PRECISION
-      trace.points.order(:distance).each do |point|
-        dist = dist_prec + point.distance * reduction_dist
-        @distances_cumulees << dist
-        alt = trace.altitude_minimum - (point.altitude - 1000) * reduction_alt
-        @altitudes << alt
+      JSON.parse(trace.polylines).each do |polyline|
+        altitudes_polyline = []
+        distances_cumulees_polyline = []
+        polyline.each do |point|
+          dist = dist_prec + point[0] * reduction_dist
+          distances_cumulees_polyline << dist
+          alt = trace.altitude_minimum - (point[1] - 1000) * reduction_alt
+          altitudes_polyline << alt
+        end
+        @distances_cumulees << distances_cumulees_polyline
+        @altitudes << altitudes_polyline
       end
-      dist_prec = @distances_cumulees.last
+      dist_prec = @distances_cumulees.last.last
     end
     maj_donnees_trek(traces)
-    points.clear
-    self.points = traite_profil
+    self.polylines = traite_profil
   end
 
   # mise à jour des données du trek

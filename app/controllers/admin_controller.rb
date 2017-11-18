@@ -18,4 +18,16 @@ class AdminController < ApplicationController
       render :password
     end
   end
+
+  def maj_polylines
+    Trace.all.each do |t|
+      profil = []
+      t.points.each do |p|
+        profil << [p.distance, p.altitude]
+      end
+      t.polylines = [profil]
+      t.save
+    end
+    redirect_to root_url, notice: 'Mise à jour effectuée.'
+  end
 end

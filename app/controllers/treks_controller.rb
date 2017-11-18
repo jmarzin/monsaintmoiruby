@@ -17,9 +17,8 @@ class TreksController < TracesController
                        .select { |f| File.extname(f).casecmp('.JPG').zero? }
                        .map { |f| File.join('/images', r.repertoire_photos, f) }
       end
-    else
-      super
     end
+    super
   end
 
   # affiche le trek projet

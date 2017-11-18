@@ -110,8 +110,7 @@ class Trace < ApplicationRecord
     end
     calcule_heures_debut_et_fin(doc)
     calc_coord_depart_et_arrivee(doc)
-    self.points.clear
-    self.points = traite_profil
+    self.polylines = traite_profil
   end
 
   # initialise les données de la trace qui seront
@@ -129,7 +128,7 @@ class Trace < ApplicationRecord
   # traite les altitudes
   def traite_altitudes(trk)
     alt = trk.xpath('.//xmlns:ele').map { |ele| ele.text.to_i }
-    @altitudes += alt
+    @altitudes << alt
     self.altitude_minimum = [altitude_minimum, alt.min].min
     self.altitude_maximum = [altitude_maximum, alt.max].max
     diff_altitudes = alt.zip(alt.drop(1))[0..-2].map { |t| t[1] - t[0] }
@@ -141,6 +140,7 @@ class Trace < ApplicationRecord
 
   # calcule et traite les distances
   def traite_distances(trk)
+    dist = []
     trkpt = trk.xpath('.//xmlns:trkpt').map do |t|
       [BigDecimal(t.xpath('@lat').text), BigDecimal(t.xpath('@lon').text)]
     end
@@ -149,8 +149,9 @@ class Trace < ApplicationRecord
     dist_cumulees = BigDecimal(distance_totale)
     distances.each do |d|
       dist_cumulees += d
-      @distances_cumulees << dist_cumulees
+      dist << dist_cumulees
     end
+    @distances_cumulees << dist
     self.distance_totale = dist_cumulees.to_i
   end
 
@@ -179,14 +180,18 @@ class Trace < ApplicationRecord
   # traite le profil
   def traite_profil
     reduction_alt = (altitude_maximum - altitude_minimum) / PRECISION
-    altitudes_pix = @altitudes.map do |a|
-      (1000 - (a - altitude_minimum) / reduction_alt).to_i
+    altitudes_pix = []
+    @altitudes.each do |al|
+      altitudes_pix << al.map do |a|
+        (1000 - (a - altitude_minimum) / reduction_alt).to_i
+      end
     end
     reduction_dist = distance_totale / (2 * PRECISION)
-    distances_cumulees_pix = @distances_cumulees
-                             .map { |a| (a / reduction_dist).to_i }
-    distances_cumulees_pix.zip(altitudes_pix).uniq
-                          .map { |c| Point.new(distance: c[0], altitude: c[1]) }
+    distances_cumulees_pix = []
+    @distances_cumulees.each do |d|
+      distances_cumulees_pix << d.map { |a| (a / reduction_dist).to_i }
+    end
+    distances_cumulees_pix.zip(altitudes_pix).map { |e| e[0].zip(e[1]).uniq }.to_json
   end
 
   private :distance, :init_trace, :traite_altitudes, :traite_distances,

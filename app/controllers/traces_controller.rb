@@ -22,6 +22,14 @@ class TracesController < ApplicationController
                        .select { |f| File.extname(f).casecmp('.JPG').zero? }
                        .map { |f| File.join('/images', @trace.repertoire_photos, f) }
     end
+    @profils = []
+    JSON.parse(@trace.polylines).each do |p|
+      texte = ''
+      p.each do |t|
+        texte += t[0].to_s + ',' + t[1].to_s + ' '
+      end
+      @profils << texte
+    end
   end
 
   # GET /traces/new
@@ -31,7 +39,7 @@ class TracesController < ApplicationController
     @garder_points = false # il n'y en a pas encore
   end
 
-  # POST /treks
+  # POST /traces
   def create
     unless params[@class_symbol][:points_attributes].nil?
       params[@class_symbol][:points_attributes].each do |_cle, pa|
@@ -44,6 +52,7 @@ class TracesController < ApplicationController
     @gpx_avant = params[:gpx_avant]
     fichier_gpx = traite_traces_si_besoin
     @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
+    @trace.polylines = '[]' if @trace.fichier_gpx.blank?
     if @trace.save
       redirect_to @trace, notice: 'La randonnée a bien été créée.'
     else
@@ -66,9 +75,9 @@ class TracesController < ApplicationController
     @gpx_avant = params[:gpx_avant]
     fichier_gpx = traite_traces_si_besoin
     @trace.fichier_gpx = fichier_gpx unless fichier_gpx.nil?
+    @trace.polylines = '[]' if @trace.fichier_gpx.blank?
     @trace.materiel_ids = params[@class_symbol][:materiel_ids]
     if @trace.save
-      @trace.points.clear if @trace.fichier_gpx.blank?
       redirect_to @trace, notice: 'La randonnée a bien été modifiée.'
     else
       init_variables
@@ -177,14 +186,12 @@ class TracesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def trace_params
     params.require(@class_symbol)
-          .permit(:titre, :sous_titre, :description,
-                  :fichier_gpx, :altitude_minimum,
-                  :altitude_maximum, :ascension_totale,
-                  :descente_totale, :heure_debut, :heure_fin,
-                  :distance_totale, :lat_depart, :long_depart,
-                  :lat_arrivee, :long_arrivee, :type, :moyen,
-                  :repertoire_photos, :creer_rep_photos,
-                  points: %i[distance altitude], materiels: [],
+          .permit(:titre, :sous_titre, :description, :fichier_gpx,
+                  :altitude_minimum, :altitude_maximum, :ascension_totale,
+                  :descente_totale, :heure_debut, :heure_fin, :distance_totale,
+                  :lat_depart, :long_depart, :lat_arrivee, :long_arrivee,
+                  :type, :moyen, :repertoire_photos, :creer_rep_photos,
+                  :polylines, points: %i[distance altitude], materiels: [],
                   gpx_candidats: [])
   end
 

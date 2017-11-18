@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171109194320) do
+ActiveRecord::Schema.define(version: 20171118111203) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -60,6 +60,7 @@ ActiveRecord::Schema.define(version: 20171109194320) do
     t.datetime "updated_at", null: false
     t.string "repertoire_photos"
     t.string "moyen"
+    t.string "polylines", default: "[]"
     t.index ["traces_id"], name: "index_traces_on_traces_id"
   end
 
