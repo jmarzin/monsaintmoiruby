@@ -21,7 +21,7 @@ class Trek < Trace
   # calcule les caractéristiques du trek à partir
   # de celles des randonnées
   def maj_sql(gpx, gpx_avant)
-    traces = Trace.where(fichier_gpx: gpx)
+    traces = Trace.where(fichier_gpx: gpx).order(:heure_debut)
     # préparation des profils à concaténer
     traces_a_traiter = prepare_traces(traces, gpx_avant)
     # traitement des profils
