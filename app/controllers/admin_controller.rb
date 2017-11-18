@@ -22,7 +22,9 @@ class AdminController < ApplicationController
   def maj_polylines
     Trace.all.each do |t|
       profil = []
-      t.points.order(:distance).each do |p|
+      x = t.points
+      xsort = x.order(:distance)
+      xsort.each do |p|
         profil << [p.distance, p.altitude]
       end
       t.polylines = [profil].to_json
