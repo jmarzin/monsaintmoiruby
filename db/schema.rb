@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171118111203) do
+ActiveRecord::Schema.define(version: 20171118164701) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -29,13 +29,6 @@ ActiveRecord::Schema.define(version: 20171118111203) do
     t.bigint "trace_id"
     t.bigint "materiel_id"
     t.index ["trace_id"], name: "index_materiels_traces_on_trace_id"
-  end
-
-  create_table "points", force: :cascade do |t|
-    t.integer "distance"
-    t.integer "altitude"
-    t.bigint "trace_id"
-    t.index ["trace_id"], name: "index_points_on_trace_id"
   end
 
   create_table "traces", force: :cascade do |t|

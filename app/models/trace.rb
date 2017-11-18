@@ -27,8 +27,6 @@ class Trace < ApplicationRecord
   validates :long_depart, presence: true, unless: :tout_vide?
   validates :long_arrivee, presence: true, unless: :tout_vide?
 
-  has_many :points, dependent: :delete_all
-  accepts_nested_attributes_for :points
   has_and_belongs_to_many :materiels, autosave: true
   accepts_nested_attributes_for :materiels
 
