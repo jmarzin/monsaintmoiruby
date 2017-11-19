@@ -66,7 +66,7 @@
                 .carousel-inner
                   -@photos.each_with_index do |p, i|
                     .carousel-item{ :class => i == 0 ? 'active' : '' }
-                      =image_tag p, class: 'd-block w-100',  alt: File.basename(p)
+                      =image_tag p, class: 'd-block img-fluid',  alt: File.basename(p)
                 %a.carousel-control-prev(href="#monCarousel" role="button" data-slide="prev")
                   %span.carousel-control-prev-icon(aria-hidden="true")
                   %span.sr-only <
