@@ -102,6 +102,7 @@
     #mapid
 
   =@trace.description.html_safe
+  %br
   - if !@photos.empty?
     %button.btn.btn-primary.fa.fa-camera-retro{ :type => 'button',
     :'data-toggle' => 'modal',  :'data-target' => '#photosModal', :title => 'Voir les photos' }
