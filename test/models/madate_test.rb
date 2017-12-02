@@ -27,4 +27,7 @@ class MadateTest < ActiveSupport::TestCase
   test "Ecart entre 28/4/2017 et 3/5/2017 est 5 jours" do
     assert_equal  "5 jours", Madate.new(28, 4, 2017).ecart(3, 5, 2017)
   end
+  test "Ecart en 30/11/2017 et 1/12/2017 est 1 jour" do
+    assert_equal "1 jour", Madate.new(30, 11, 2017).ecart(1,12,2017)
+  end
 end

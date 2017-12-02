@@ -22,19 +22,19 @@ class Madate
   # en années, mois et jours
   def ecart(jour, mois, annee)
     if jour < @jour
-      jour += if mois.even?
-                31
-              elsif mois == 3
-                28
-              else
-                30
-              end
+      case mois
+        when 1, 2, 4, 6, 8, 9, 11
+          jour += 31
+        when 5, 7, 10, 12
+          jour += 30
+        else
+          jour += (annee % 4).zero? ? 29 : 28
+      end
       mois -= 1
     end
     if mois < @mois
       mois += 12
       annee -= 1
-      jour+=1 if mois.even?
     end
     return 'Je suis déjà parti !' if annee < @annee
     res = ecart_texte(annee - @annee, 'année') + ' ' +
