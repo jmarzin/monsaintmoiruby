@@ -8,11 +8,13 @@ class MaterielsController < ApplicationController
   # GET /materiels
   def index
     @materiels = Materiel.all.order(reforme: :asc, poids: :desc)
+    @affiche_poids = false
   end
 
   # GET  /materiels/traces/1
   def index_trace
     @materiels = Trace.find(params[:id]).materiels.order(poids: :desc)
+    @affiche_poids = true
     render 'index'
   end
 

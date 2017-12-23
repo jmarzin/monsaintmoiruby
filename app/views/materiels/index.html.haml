@@ -1,9 +1,10 @@
 %p#notice= notice
 .container
-  %h3.mt-2
-    Poids total du sac :
-    =@materiels.select { |m| !m.reforme }.map { |m| m.poids }.reduce(:+)
-    g
+  -if @affiche_poids
+    %h3.mt-2
+      Poids total du sac :
+      =@materiels.select { |m| !m.reforme }.map { |m| m.poids }.reduce(:+)
+      g
   -if session['admin']
     =link_to '', new_materiel_path,
       type: 'button', class: 'btn btn-link fa fa-plus'
