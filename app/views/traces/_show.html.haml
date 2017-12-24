@@ -59,10 +59,10 @@
           .modal-body
             .container-fluid
               #monCarousel.carousel.slide(data-ride="carousel")
-                %ol.carousel-indicators
-                  -@photos.each_index do |i|
-                    %li{ :class => i == 0 ? 'active' : '',
-                     'data-target': '#monCarousel', 'data-slide-to': "#{i}" }
+                -#%ol.carousel-indicators
+                -#  -@photos.each_index do |i|
+                -#    %li{ :class => i == 0 ? 'active' : '',
+                -#     'data-target': '#monCarousel', 'data-slide-to': "#{i}" }
                 .carousel-inner
                   -@photos.each_with_index do |p, i|
                     .carousel-item{ :class => i == 0 ? 'active' : '' }
