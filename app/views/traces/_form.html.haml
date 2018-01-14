@@ -64,10 +64,10 @@
       = f.number_field :descente_totale
     .field
       = f.label :heure_debut
-      = f.datetime_select :heure_debut, default: 12.hours.from_now
+      = f.datetime_select :heure_debut, default: 12.hours.ago
     .field
       = f.label :heure_fin
-      = f.datetime_select :heure_fin, default: 1.hour.from_now
+      = f.datetime_select :heure_fin, default: 1.hour.ago
     .field
       = f.label :distance_totale_en_mètres
       = f.number_field :distance_totale
