@@ -70,7 +70,7 @@ class TreksController < TracesController
   # conserve la liste des randonnées sélectionnées lors de la
   # dernière transaction
   def gpx_avant
-    @trace.fichier_gpx.blank? ? [''] : @trace.randonnees.collect(&:fichier_gpx).sort
+    @trace.fichier_gpx.blank? || @trace.randonnees.empty? ? [''] : @trace.randonnees.collect(&:fichier_gpx).sort
   end
 
   # lance le traitement de fusion des traces des randonnées
