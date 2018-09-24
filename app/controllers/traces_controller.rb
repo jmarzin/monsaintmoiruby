@@ -14,6 +14,7 @@ class TracesController < ApplicationController
 
   # GET /traces/1
   def show
+    
     @photos = []
     unless @trace.repertoire_photos.blank?
       repertoire = Rails.root.join('public', 'images', @trace.repertoire_photos)
