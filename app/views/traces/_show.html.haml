@@ -66,7 +66,10 @@
                 .carousel-inner
                   -@photos.each_with_index do |p, i|
                     .carousel-item{ :class => i == 0 ? 'active' : '' }
-                      =image_tag p, class: 'd-block img-fluid',  alt: File.basename(p)
+                      -if File.basename(p)[-1] == '4'
+                        =video_tag p, class: 'd-block img-fluid', controls: true, autoplay: true, loop: true
+                      -else
+                        =image_tag p, class: 'd-block img-fluid',  alt: File.basename(p)
                 %a.carousel-control-prev(href="#monCarousel" role="button" data-slide="prev")
                   %span.carousel-control-prev-icon(aria-hidden="true")
                   %span.sr-only <

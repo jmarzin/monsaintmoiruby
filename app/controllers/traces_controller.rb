@@ -19,7 +19,7 @@ class TracesController < ApplicationController
       repertoire = Rails.root.join('public', 'images', @trace.repertoire_photos)
       @photos = Dir.entries(repertoire) if repertoire.exist?
       @photos = @photos.sort
-                       .select { |f| File.extname(f).casecmp('.JPG').zero? }
+                       .select { |f| File.extname(f).casecmp('.JPG').zero? || File.extname(f).casecmp('.MP4').zero?}
                        .map { |f| File.join('/images', @trace.repertoire_photos, f) }
     end
     @profils = []
