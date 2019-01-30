@@ -125,15 +125,25 @@ class Trace < ApplicationRecord
 
   # traite les altitudes
   def traite_altitudes(trk)
-    alt = trk.xpath('.//xmlns:ele').map { |ele| ele.text.to_i }
-    @altitudes << alt
-    self.altitude_minimum = [altitude_minimum, alt.min].min
-    self.altitude_maximum = [altitude_maximum, alt.max].max
-    diff_altitudes = alt.zip(alt.drop(1))[0..-2].map { |t| t[1] - t[0] }
+    alt = trk.xpath('.//xmlns:ele').map { |ele| ele.text.to_f }
+    alt_lissees = alt
+    if alt.size > 5
+      for i in 2..alt.size - 3
+        sum = 0
+        for j in -2..2
+          sum += alt[i - j]
+        end
+        alt_lissees[i] = sum / 5
+      end
+    end
+    @altitudes << alt_lissees
+    self.altitude_minimum = [altitude_minimum, alt_lissees.min].min.to_i
+    self.altitude_maximum = [altitude_maximum, alt_lissees.max].max.to_i
+    diff_altitudes = alt_lissees.zip(alt_lissees.drop(1))[0..-2].map { |t| t[1] - t[0] }
     self.ascension_totale += diff_altitudes.select { |dif| dif > 0 }
-                                           .reduce(0, :+)
+                                           .reduce(0, :+).to_i
     self.descente_totale += diff_altitudes.select { |dif| dif < 0 }
-                                          .reduce(0, :+).abs
+                                          .reduce(0, :+).abs.to_i
   end
 
   # calcule et traite les distances
