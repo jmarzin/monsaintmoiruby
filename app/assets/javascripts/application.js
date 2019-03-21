@@ -33,7 +33,7 @@ function editeur() {
 
 function afficheCarte(champ, fichier, depart, arrivee) {
     var mymap = L.map(champ);
-    var hikebikemapUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var hikebikemapUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';//version 2
     var hikebikemapAttribution = 'Map Data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     var hikebikemap = new L.TileLayer(hikebikemapUrl, {maxZoom: 17, attribution: hikebikemapAttribution});
     hikebikemap.addTo(mymap);
