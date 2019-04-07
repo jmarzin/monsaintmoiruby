@@ -90,12 +90,13 @@ class Trace < ApplicationRecord
                           (cos_sigma * (-1 + 2 * cos2_sigma_m * cos2_sigma_m) -
                           b_maj / 6 * cos2_sigma_m * (-3 + 4 * sin_sigma *
                           sin_sigma) * (-3 + 4 * cos2_sigma_m * cos2_sigma_m)))
-    b * a_maj * (sigma - delta_sigma)
+    result = b * a_maj * (sigma - delta_sigma)
   end
 
   # met à jour les caractéristiques de la randonnées et construit
   # le profil après ouverture du fichier gpx
   def maj
+    debut = Time.now
     doc = File.open(File.join('public', 'gpx',
                                self.class == Randonnee ? 'randos' : 'treks',
                                fichier_gpx)) { |f| Nokogiri::XML(f) }
@@ -109,6 +110,8 @@ class Trace < ApplicationRecord
     calcule_heures_debut_et_fin(doc)
     calc_coord_depart_et_arrivee(doc)
     self.polylines = traite_profil
+    fin = Time.now
+    puts fin - debut
   end
 
   # initialise les données de la trace qui seront
