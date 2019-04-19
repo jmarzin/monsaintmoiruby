@@ -5,7 +5,7 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 gem 'ffi'
-# gem 'helix-rails', '~> 0.5.0'
+
 # Utilitaire pour nettoyer les strings HTML
 gem 'htmlentities', '~> 4.3', '>= 4.3.4'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
@@ -68,4 +68,4 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 # gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-# gem 'gpx_manage', path: 'crates/gpx_manage'
+

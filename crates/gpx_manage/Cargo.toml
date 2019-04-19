@@ -1,9 +1,0 @@
-[package]
-name = "gpx_manage"
-version = "0.1.0"
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-helix = "0.7.5"
