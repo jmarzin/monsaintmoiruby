@@ -134,7 +134,7 @@ class Trek < Trace
     latitudes = trkpts.map { |l| BigDecimal(l.attribute('lat').text) }
     longitudes = trkpts.map { |l| BigDecimal(l.attribute('lon').text) }
     resultat.sub(/<bounds .*?\/>/m,
-                 "<bounds maxlat=\"#{latitudes.max}\" maxlong=\"#{longitudes.max}\" minlat=\"#{latitudes.min}\" minlon=\"#{longitudes.min}\"/>")
+                 "<bounds maxlat=\"#{latitudes.max}\" maxlon=\"#{longitudes.max}\" minlat=\"#{latitudes.min}\" minlon=\"#{longitudes.min}\"/>")
   end
 
   # détermine le nom du fichier et l'écrit
