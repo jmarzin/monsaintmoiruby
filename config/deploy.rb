@@ -6,6 +6,7 @@
 # pour lancer le serveur faire    bundle exec puma -e production -d --pidfile RUNNINGPID
 # pour relancer le serveur faire  kill -s SIGUSR2 `cat RUNNINGPID`
 # pour arrêter le serveur faire   kill -s SIGTERM `cat RUNNINGPID`
+set :format, :pretty
 set :repo_url, 'https://github.com/jmarzin/monsaintmoiruby.git'
 
 set :deploy_to, '/home/deploy/monsaintmoiruby'
